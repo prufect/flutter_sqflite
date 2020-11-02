@@ -1,6 +1,31 @@
 import 'package:flutter/material.dart';
 
-class TodoListScreen extends StatelessWidget {
+class TodoListScreen extends StatefulWidget {
+  @override
+  _TodoListScreenState createState() => _TodoListScreenState();
+}
+
+class _TodoListScreenState extends State<TodoListScreen> {
+  _buildTask(int index) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 25.0),
+      child: Column(
+        children: [
+          ListTile(
+            title: Text("Task Title"),
+            subtitle: Text('Oct 2, 2019 • High'),
+            trailing: Checkbox(
+              onChanged: (value) => print(value),
+              activeColor: Theme.of(context).primaryColor,
+              value: true,
+            ),
+          ),
+          Divider(),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -45,12 +70,7 @@ class TodoListScreen extends StatelessWidget {
               ),
             );
           }
-          return Container(
-            margin: EdgeInsets.all(16),
-            height: 100,
-            width: double.infinity,
-            color: Colors.red[400],
-          );
+          return _buildTask(index);
         },
       ),
     );
