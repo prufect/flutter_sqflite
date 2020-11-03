@@ -1,7 +1,17 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_sqflite/helpers/database_helper.dart';
+import 'package:flutter_sqflite/models/task_model.dart';
 import 'package:intl/intl.dart';
 
 class AddTaskScreen extends StatefulWidget {
+  final Task task;
+  final Function updateTaskList;
+
+  const AddTaskScreen({
+    Key key,
+    this.task,
+    this.updateTaskList,
+  }) : super(key: key);
   @override
   _AddTaskScreenState createState() => _AddTaskScreenState();
 }
@@ -19,6 +29,13 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
   @override
   void initState() {
     super.initState();
+
+    if (widget.task != null) {
+      _title = widget.task.title;
+      _date = widget.task.date;
+      _priority = widget.task.priority;
+    }
+
     _dateController.text = _dateFormatter.format(_date);
   }
 
@@ -45,10 +62,28 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
     }
   }
 
+  _delete() {
+    DatabaseHelper.instance.deleteTask(widget.task.id);
+    widget.updateTaskList();
+    Navigator.pop(context);
+  }
+
   _submit() {
     if (_formKey.currentState.validate()) {
       _formKey.currentState.save();
       print('$_title • $_date • $_priority');
+
+      Task task = Task(title: _title, date: _date, priority: _priority);
+      if (widget.task == null) {
+        task.status = 0;
+        DatabaseHelper.instance.insertTask(task);
+      } else {
+        task.id = widget.task.id;
+        task.status = widget.task.status;
+        DatabaseHelper.instance.updateTask(task);
+      }
+
+      widget.updateTaskList();
       Navigator.pop(context);
     }
   }
@@ -76,7 +111,7 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
                   height: 20,
                 ),
                 Text(
-                  'Add task',
+                  widget.task == null ? 'Add task' : 'Update task',
                   style: TextStyle(
                     color: Colors.black,
                     fontSize: 40.0,
@@ -174,11 +209,32 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
                         child: FlatButton(
                           onPressed: _submit,
                           child: Text(
-                            "Add",
+                            widget.task == null ? "Add" : "Update",
                             style: TextStyle(color: Colors.white, fontSize: 20),
                           ),
                         ),
-                      )
+                      ),
+                      widget.task != null
+                          ? Container(
+                              margin: EdgeInsets.symmetric(
+                                vertical: 20,
+                              ),
+                              height: 60.0,
+                              width: double.infinity,
+                              decoration: BoxDecoration(
+                                color: Theme.of(context).primaryColor,
+                                borderRadius: BorderRadius.circular(30),
+                              ),
+                              child: FlatButton(
+                                onPressed: _delete,
+                                child: Text(
+                                  "Delete",
+                                  style: TextStyle(
+                                      color: Colors.white, fontSize: 20),
+                                ),
+                              ),
+                            )
+                          : SizedBox.shrink()
                     ],
                   ),
                 )

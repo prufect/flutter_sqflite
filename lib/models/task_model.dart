@@ -26,7 +26,7 @@ class Task {
     return {
       'id': id ?? null,
       'title': title,
-      'date': date?.millisecondsSinceEpoch,
+      'date': date?.toIso8601String(),
       'priority': priority,
       'status': status,
     };
@@ -38,7 +38,7 @@ class Task {
     return Task.withId(
       id: map['id'],
       title: map['title'],
-      date: DateTime.fromMillisecondsSinceEpoch(map['date']),
+      date: DateTime.parse(map['date']),
       priority: map['priority'],
       status: map['status'],
     );
